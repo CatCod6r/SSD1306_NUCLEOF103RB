@@ -1,0 +1,55 @@
+#include "SSD1306.h"
+#include <stdint.h>
+
+void ssd1306_init(SSD1306* ssd1306, I2C_HandleTypeDef* hi2c1, uint16_t device_addr){
+	ssd1306->hi2c1 = hi2c1;
+	ssd1306->device_addr = device_addr;
+
+	uint8_t init_commands[] = {
+	        0xAE,       // Display OFF
+	        0x20, 0x00, // Memory mode = horizontal
+	        0x21, 0x00, 0x7F, // Column address range (0-127)
+	        0x22, 0x00, 0x07, // Page address range (0-7)
+	        0x40,       // Display start line
+	        0xA0,       // Segment remap
+	        0xA8, 0x3F, // Multiplex ratio (64-1)
+	        0xC0,       // COM scan direction
+	        0xDA, 0x12, // COM pins hardware configuration
+	        0x81, 0x7F, // Contrast control
+	        0xA4,       // Display follows RAM content
+	        0xA6,       // Normal display (not inverted)
+	        0xD5, 0x80, // Display clock divide ratio/oscillator frequency
+	        0x8D, 0x14, // Enable charge pump
+	        0xAF        // Display ON
+	    };
+
+	    for (int i = 0; i < sizeof(init_commands); i++) {
+	    	ssd1306_send_cmd(ssd1306, init_commands[i]);
+	    }
+}
+void ssd1306_send_cmd(SSD1306* ssd1306 ,uint8_t cmd) {
+    uint8_t buffer[2] = {0x00, cmd}; // Control byte (0x00 for command) + command
+    HAL_I2C_Master_Transmit(ssd1306->hi2c1, ssd1306->device_addr ,buffer, sizeof(buffer), -1);
+}
+// Send data to SSD1306
+void ssd1306_send_data(SSD1306* ssd1306, uint8_t data) {
+    uint8_t buffer[2] = {0x40, data}; // Control byte (0x40 for data) + data
+    HAL_I2C_Master_Transmit(ssd1306->hi2c1, ssd1306->device_addr ,buffer, sizeof(buffer),-1);
+}
+void ssd1306_draw_pixel(SSD1306* ssd1306, uint8_t x, uint8_t y){
+	// if (x >= 128 || y >= 64) return -1;
+	    // Set column address
+	ssd1306_send_cmd(ssd1306, 0x21);
+	ssd1306_send_cmd(ssd1306, x);
+	ssd1306_send_cmd(ssd1306, x);
+
+	    // Set page address
+	ssd1306_send_cmd(ssd1306, 0x22);
+	ssd1306_send_cmd(ssd1306, y / 8);
+	ssd1306_send_cmd(ssd1306, y / 8);
+
+	    // Send the pixel data
+	uint8_t pixel_bit = 1 << (y % 8);
+	ssd1306_send_data(ssd1306, pixel_bit);
+
+}
