@@ -27,14 +27,13 @@ void ssd1306_init(SSD1306* ssd1306, I2C_HandleTypeDef* hi2c1, uint16_t device_ad
 	    	ssd1306_send_cmd(ssd1306, init_commands[i]);
 	    }
 }
-void ssd1306_send_cmd(SSD1306* ssd1306 ,uint8_t cmd) {
-    uint8_t buffer[2] = {0x00, cmd}; // Control byte (0x00 for command) + command
-    HAL_I2C_Master_Transmit(ssd1306->hi2c1, ssd1306->device_addr ,buffer, sizeof(buffer), -1);
+void ssd11306_send_cmd(SSD1306* ssd1306 ,uint8_t cmd) {
+    HAL_I2C_Mem_Write(ssd1306->hi2c1, ssd1306->device_addr, 0x00, 1, &cmd, 1, -1);
 }
 // Send data to SSD1306
 void ssd1306_send_data(SSD1306* ssd1306, uint8_t data) {
-    uint8_t buffer[2] = {0x40, data}; // Control byte (0x40 for data) + data
-    HAL_I2C_Master_Transmit(ssd1306->hi2c1, ssd1306->device_addr ,buffer, sizeof(buffer),-1);
+    // uint8_t buffer[2] = {0x40, data}; // Control byte (0x40 for data) + data
+    HAL_I2C_Mem_Write(ssd1306->hi2c1, ssd1306->device_addr, 0x40, 1, &data, 1, -1);
 }
 void ssd1306_draw_pixel(SSD1306* ssd1306, uint8_t x, uint8_t y){
 	// if (x >= 128 || y >= 64) return -1;
