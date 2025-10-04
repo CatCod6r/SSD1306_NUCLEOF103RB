@@ -27,7 +27,7 @@ void ssd1306_init(SSD1306* ssd1306, I2C_HandleTypeDef* hi2c1, uint16_t device_ad
 	    	ssd1306_send_cmd(ssd1306, init_commands[i]);
 	    }
 }
-void ssd11306_send_cmd(SSD1306* ssd1306 ,uint8_t cmd) {
+void ssd1306_send_cmd(SSD1306* ssd1306 ,uint8_t cmd) {
     HAL_I2C_Mem_Write(ssd1306->hi2c1, ssd1306->device_addr, 0x00, 1, &cmd, 1, -1);
 }
 // Send data to SSD1306
@@ -51,4 +51,22 @@ void ssd1306_draw_pixel(SSD1306* ssd1306, uint8_t x, uint8_t y){
 	uint8_t pixel_bit = 1 << (y % 8);
 	ssd1306_send_data(ssd1306, pixel_bit);
 
+}
+// Clear entire display RAM (fill with zeros)
+void ssd1306_clear_ram(SSD1306* ssd1306) {
+    // Set entire display area
+	ssd1306_send_cmd(ssd1306, 0x21); // Column address command
+	ssd1306_send_cmd(ssd1306, 0x00); // Start column
+	ssd1306_send_cmd(ssd1306, 0x7F); // End column (127)
+
+	ssd1306_send_cmd(ssd1306, 0x22); // Page address command
+	ssd1306_send_cmd(ssd1306, 0x00); // Start page
+	ssd1306_send_cmd(ssd1306, 0x07); // End page (7)
+
+    // Fill entire display with zeros
+    for (int page = 0; page < 8; page++) {
+        for (int col = 0; col < 128; col++) {
+            ssd1306_send_data(ssd1306, 0x00);
+        }
+    }
 }

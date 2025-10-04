@@ -95,7 +95,8 @@ int main(void)
   MX_USART2_UART_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  ssd1306_init(&ssd1306, &hi2c1, 0x3C << 1);
+  ssd1306_init(&ssd1306, &hi2c1, 0x78);
+  ssd1306_clear_ram(&ssd1306);
   ssd1306_draw_pixel(&ssd1306, 64, 32);
   /* USER CODE END 2 */
 
